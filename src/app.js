@@ -1,14 +1,14 @@
 "use strict"
 
 // Load in our libraries
-var icloud = require('find-my-iphone').findmyphone
-var prompt = require('prompt')
-var blessed = require('blessed')
-var contrib = require('blessed-contrib')
-var innerMap = require('map-canvas')
+const icloud = require('find-my-iphone').findmyphone
+const prompt = require('prompt')
+const blessed = require('blessed')
+const contrib = require('blessed-contrib')
+const innerMap = require('map-canvas')
 const format = require('date-format')
 const chalk = require('chalk')
-var fs = require('fs')
+const fs = require('fs')
 
 const TIME_MS = 1
 const TIME_SEC = TIME_MS * 1000
@@ -180,13 +180,19 @@ class Dashboard {
 
 
 prompt.get(schema, (err, result) => {
+  if(err) {
+    console.log("\nGoodbye!")
+    return
+  }
+
   icloud.apple_id = result.username
   icloud.password = result.password
 
   icloud.getDevices((error, devices) => {
 
     if(error) {
-      throw error
+      console.log("\nBad Credentials!")
+      return
     }
 
     // Find our device
