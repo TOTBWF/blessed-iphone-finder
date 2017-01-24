@@ -69,8 +69,7 @@ class Dashboard {
       }
     }
 
-    // Widgets
-    // Vancouver Lat/Lon: -123.2793,49.1557,-122.7365,49.3716
+    // Widgets for the dashboard
     const widgets = {
       map: {
         type: contrib.map,
@@ -170,46 +169,54 @@ class Dashboard {
 
 
   /**
+   * Renders the dashboard
    *
+   * @return {Void}
    */
   render() {
     this.screen.render();
   }
 }
 
+// Setup our dashboard and initialize our prompt
 const dashboard = new Dashboard()
-dashboard.waypoint({lon: -123.1, lat: 49.25})
-dashboard.render()
+prompt.start()
 
+prompt.get(schema, (err, result) => {
+  icloud.apple_id = result.username
+  icloud.password = result.password
 
+  icloud.getDevices((error, devices) => {
 
-//prompt.start();
+    if(error) {
+      throw error
+    }
 
-//prompt.get(schema, (err, result) => {
-//  icloud.apple_id = result.username
-//  icloud.password = result.password
-//
-//  icloud.getDevices((error, devices) => {
-//
-//    if(error) {
-//      throw error;
-//    }
-//
-//    // Find our device
-//    devices.forEach((d) => {
-//      if (device == undefined && d.lostModeCapable) {
-//        device = d;
-//      }
-//    });
-//    // Run our queryDevice function every minute
-//    setInterval(queryDevice, 60*1000);
-//    dashboard.render()
-//  });
-//});
+    // Find our device
+    devices.forEach((d) => {
+      if (device == undefined && d.lostModeCapable) {
+        device = d
+      }
+    })
+    // Run our queryDevice function every minute
+    setInterval(queryDevice, 60*1000)
+    dashboard.render()
+  })
+})
 
+/**
+ * Queries the device and logs and displays the data
+ *
+ * @return {Void}
+ */
 function queryDevice() {
   icloud.getLocationOfDevice(device, function(err, location) {
-    console.log(location);
-    fs.appendFile(logname, location + '\n', function(err) { console.log(err)});
-  });
+    if(location) {
+      dashboard.log("Lat:" + location.latitude + " Lon:" + location.longitude)
+      dashboard.waypoint({lat: location.latitude, lon:location.longitude})
+      fs.appendFile(logname, location + '\n', function(err) { console.log(err)})
+    } else {
+      dashboard.log("No Connection to Device...")
+    }
+  })
 }
