@@ -178,9 +178,6 @@ class Dashboard {
   }
 }
 
-// Setup our dashboard and initialize our prompt
-const dashboard = new Dashboard()
-prompt.start()
 
 prompt.get(schema, (err, result) => {
   icloud.apple_id = result.username
@@ -198,8 +195,10 @@ prompt.get(schema, (err, result) => {
         device = d
       }
     })
+    const dashboard = new Dashboard()
     // Run our queryDevice function every minute
-    setInterval(queryDevice, 60*1000)
+    // We have to create an anonymous function wrapper be
+    setInterval(() => { queryDevice(dashboard) }, 60*1000)
     dashboard.render()
   })
 })
@@ -207,9 +206,11 @@ prompt.get(schema, (err, result) => {
 /**
  * Queries the device and logs and displays the data
  *
+ * @param {Obj} The dashboard object to draw to
+ *
  * @return {Void}
  */
-function queryDevice() {
+function queryDevice(dashboard) {
   icloud.getLocationOfDevice(device, function(err, location) {
     if(location) {
       dashboard.log("Lat:" + location.latitude + " Lon:" + location.longitude)
@@ -220,3 +221,5 @@ function queryDevice() {
     }
   })
 }
+
+prompt.start()
